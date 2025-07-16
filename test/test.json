@@ -1,0 +1,15 @@
+{
+  "name": "Test Config",
+  "version": 1.0,
+  "enabled": true,
+  "features": ["alpha", "beta", "gamma"],
+  "settings": {
+    "volume": 75,
+    "fullscreen": false,
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "themes": null
+  }
+}
