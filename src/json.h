@@ -17,21 +17,24 @@ typedef enum
     String,
     Boolean,
     Array,
-    Object
+    Object,
+    Null
   } JSON_Types;
 
 struct JSON_KeyPair
 {
   JSON_Types type;
   char *key;
-  int data_len;
+  size_t data_len;
   unsigned char *data;
 };
 
 struct JSON_Object
 {
-  int val_count;
+  size_t val_count;
+  size_t child_count;
   JSON_KeyPair *val_arr;
+  JSON_Object **child_arr;
   JSON_Object *parent;
 };
 

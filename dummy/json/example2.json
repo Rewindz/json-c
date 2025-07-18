@@ -1,5 +1,21 @@
 {
     "fruit": "Apple",
     "size": "Large",
-    "color": "Red"
+    "color": "Red",
+    "amount": 21,
+    "eaten": true,
+    "people": {
+	"test": 1,
+	"test2": 2,
+	"parents": {
+	    "p1": 3,
+	    "p2": 4,
+	    "p3": 5
+	}
+	"children": {
+	    "c1": 6,
+	    "c2": 7,
+	    "c3": 8
+	}
+    }
 }

@@ -45,8 +45,9 @@ static void parsing_error(JSON_File *jf, char *buf){
 	  buf);
   free(buf);
   close_json_file(jf);
-  
 }
+
+//TODO: Create free/cleanup functions
 
 void parse_json_file(JSON_File *jf)
 {
@@ -64,7 +65,10 @@ void parse_json_file(JSON_File *jf)
   while( (c_i = fgetc(jf->json_f)) != EOF ){
     unsigned char c = (unsigned char) c_i;
     if( c == '"' && state.current_obj){
-      if(!state.instring) state.instring = 1;
+      if(!state.instring){
+	state.instring = 1;
+	continue;
+      }
       else{
 	state.instring = 0;
 	if(state.inkey){
@@ -78,6 +82,7 @@ void parse_json_file(JSON_File *jf)
 	  state.current_kvp->type = String;
 	}else{
 	  parsing_error(jf, strdup(state.str_buf));
+	  fprintf(stderr, "Trying to eval a string, but not in either a key nor a value!\n");
 	  free(state.str_buf);
 	  return;
 	}
@@ -92,17 +97,30 @@ void parse_json_file(JSON_File *jf)
     if(!state.instring){
       switch(c){
       case '{': // Open Block
-	state.inkey = 1;
 	if(!state.current_obj){ // Should be first or 'main' object
  	  state.current_obj = calloc(1, sizeof(JSON_Object));
 	}else{ // New Objects
-	  JSON_Object *obj = calloc(1, sizeof(JSON_Object));
-	  obj->parent = state.current_obj;
-	  state.current_obj = obj;
+	  if(state.invalue){
+	    state.current_kvp->type = Object;
+	    state.current_kvp->data = calloc(1, sizeof(JSON_Object));
+	    ((JSON_Object*)state.current_kvp->data)->parent = state.current_obj;
+	    state.current_obj = (JSON_Object *)state.current_kvp->data;
+	  }else{
+	    JSON_Object *obj = calloc(1, sizeof(JSON_Object));
+	    obj->parent = state.current_obj;
+	    state.current_obj->child_arr =
+	      reallocarray(state.current_obj->child_arr, ++state.current_obj->child_count, sizeof(JSON_Object*));
+	    state.current_obj->child_arr[state.current_obj->child_count-1] = obj;
+	    state.current_obj = obj;
+	  }
 	}
+	state.inkey = 1;
+	state.invalue = 0;
 	break;
       case '}': // Close Block
-	state.current_obj = state.current_obj->parent;
+	state.current_obj = (state.current_obj->parent) ? state.current_obj->parent : state.current_obj;
+	state.inkey = 1;
+	state.invalue = 0;
 	break;
       case '[': // Open Array
 	state.inarray = 1;
@@ -119,18 +137,33 @@ void parse_json_file(JSON_File *jf)
 	state.inkey = 0;
 	break;
       default: // Numbers and bool [true, false, null, NaN(?)]
+	if(!state.invalue) break;
 	if(isspace(c) || c == '\n')break;
+	if(isalpha(c)){
+	  state.current_kvp->data = calloc(1, sizeof(unsigned char));
+	  state.current_kvp->type = Boolean;
+	  state.current_kvp->data_len = sizeof(unsigned char);
+	  *state.current_kvp->data = ( (c == 't') ? 1 : 0);
+	  if(c == 'n') state.current_kvp->type = Null;
+	  do{
+	    c_i = fgetc(jf->json_f);
+	  }while(c_i != EOF && isalpha(c_i));
+	  c_i = ungetc(c_i, jf->json_f);
+	  break;
+	}
 	if(isdigit(c) || c == '-'){
+	  size_t num = (isdigit(c) ? c - 48 : 0);
 	  uint8_t isnegative = (c == '-');
 	  while( (c_i = fgetc(jf->json_f)) != EOF){
 	    c = (unsigned char) c_i;
-	    size_t num = 0;
 	    if(c == '\n' || c == ','){
 	      if (isnegative) num *= -1;
 	      state.current_kvp->data = calloc(1, sizeof(num));
 	      memcpy(state.current_kvp->data, &num, sizeof(num));
 	      state.current_kvp->data_len = sizeof(num);
 	      state.current_kvp->type = Number;
+	      state.invalue = 0;
+	      state.inkey = 1;
 	      break;
 	    }else if(isdigit(c)){
 	      num *= 10;
@@ -149,11 +182,8 @@ void parse_json_file(JSON_File *jf)
       state.str_buf[len] = c;
     }
   }
-  //Loop until we are at top level parent
-  while(state.current_obj->parent){
-    if(state.current_obj->parent)state.current_obj = state.current_obj->parent;
-  };
-  
+  jf->main_object = state.current_obj;
+  free(state.str_buf);
   
   close_json_file(jf);
 }

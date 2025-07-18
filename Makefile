@@ -18,6 +18,7 @@ $(BUILD_DIR):
 
 $(DUMMY_TARGET): $(TARGET)
 	gcc ./dummy/dummy.c $(C_FLAGS) -L./$(BUILD_DIR) -Wl,-rpath,./ -ljsonc -o $@
+	cp $^ ./dummy/.
 
 dummy: $(DUMMY_TARGET)
 
@@ -26,5 +27,6 @@ all: $(TARGET)
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f $(DUMMY_TARGET)
+	rm -f ./dummy/libjsonc.so
 
 .PHONY: all clean dummy
