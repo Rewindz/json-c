@@ -1,4 +1,4 @@
-C_FLAGS ?= -Wall -Wextra
+C_FLAGS ?= -Wall -Wextra -ggdb
 
 BUILD_DIR ?= build
 SRC_DIR := src
@@ -17,7 +17,7 @@ $(BUILD_DIR):
 	mkdir -p $@
 
 $(DUMMY_TARGET): $(TARGET)
-	gcc ./dummy/dummy.c $(C_FLAGS) -L./build -Wl,-rpath=./build -ljsonc -o $@
+	gcc ./dummy/dummy.c $(C_FLAGS) -L./$(BUILD_DIR) -Wl,-rpath,./ -ljsonc -o $@
 
 dummy: $(DUMMY_TARGET)
 

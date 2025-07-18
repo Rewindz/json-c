@@ -43,7 +43,8 @@ typedef struct
 
 
 void __print_version();
-
+JSON_File open_json_file(const char* file, const char *mode);
+void parse_json_file(JSON_File *jf);
 
 
 #endif //JSON_H_

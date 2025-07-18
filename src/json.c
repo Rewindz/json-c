@@ -1,5 +1,7 @@
 #include "json.h"
 
+#include <ctype.h>
+
 #define JSON_C_VERSION "0.01a"
 
 void __print_version()
@@ -117,6 +119,25 @@ void parse_json_file(JSON_File *jf)
 	state.inkey = 0;
 	break;
       default: // Numbers and bool [true, false, null, NaN(?)]
+	if(isspace(c) || c == '\n')break;
+	if(isdigit(c) || c == '-'){
+	  uint8_t isnegative = (c == '-');
+	  while( (c_i = fgetc(jf->json_f)) != EOF){
+	    c = (unsigned char) c_i;
+	    size_t num = 0;
+	    if(c == '\n' || c == ','){
+	      if (isnegative) num *= -1;
+	      state.current_kvp->data = calloc(1, sizeof(num));
+	      memcpy(state.current_kvp->data, &num, sizeof(num));
+	      state.current_kvp->data_len = sizeof(num);
+	      state.current_kvp->type = Number;
+	      break;
+	    }else if(isdigit(c)){
+	      num *= 10;
+	      num += (c - 48);
+	    }
+	  }
+	}
 	break;
       }
     }else{
@@ -128,6 +149,10 @@ void parse_json_file(JSON_File *jf)
       state.str_buf[len] = c;
     }
   }
+  //Loop until we are at top level parent
+  while(state.current_obj->parent){
+    if(state.current_obj->parent)state.current_obj = state.current_obj->parent;
+  };
   
   
   close_json_file(jf);
