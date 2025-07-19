@@ -1,0 +1,102 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice",
+      "profile": {
+        "bio": "Loves cats",
+        "stats": {
+          "followers": 120,
+          "following": 75,
+          "posts": [
+            {
+              "id": 101,
+              "title": "My cat",
+              "comments": [
+                { "user": "Bob", "text": "Nice cat" },
+                { "user": "Charlie", "text": "Adorable!" }
+              ]
+            },
+            {
+              "id": 102,
+              "title": "Cat again",
+              "comments": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Bob",
+      "profile": {
+        "bio": "Hates cats",
+        "stats": {
+          "followers": 42,
+          "following": 88,
+          "posts": [
+            {
+              "id": 103,
+              "title": "Rant",
+              "comments": [
+                {
+                  "user": "Alice",
+                  "text": "Don't be mean",
+                  "meta": {
+                    "replies": [
+                      { "user": "Bob", "text": "Freedom of speech" },
+                      { "user": "Dan", "text": "Everyone chill" }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "Charlie",
+      "profile": {
+        "bio": "Neutral",
+        "stats": {
+          "followers": 10,
+          "following": 10,
+          "posts": []
+        }
+      }
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "notifications": {
+      "email": true,
+      "sms": false,
+      "push": {
+        "enabled": true,
+        "channels": ["news", "updates", "replies"]
+      }
+    },
+    "privacy": {
+      "profile_visibility": "friends_only",
+      "last_seen": "nobody"
+    }
+  },
+  "system": {
+    "version": "1.5.3",
+    "uptime": 1293024,
+    "services": {
+      "auth": { "status": "online", "latency": 12 },
+      "db": { "status": "online", "latency": 23 },
+      "cache": {
+        "status": "online",
+        "latency": 4,
+        "replicas": [
+          { "host": "cache1", "status": "online" },
+          { "host": "cache2", "status": "offline" }
+        ]
+      }
+    }
+  }
+}

@@ -9,7 +9,7 @@
 
 typedef struct JSON_Object JSON_Object;
 typedef struct JSON_KeyPair JSON_KeyPair;
-
+typedef struct JSON_Array JSON_Array;
 
 typedef enum
   {
@@ -29,6 +29,13 @@ struct JSON_KeyPair
   unsigned char *data;
 };
 
+struct JSON_Array
+{
+  size_t arr_len;
+  JSON_KeyPair *kvp_arr;
+  JSON_Array *parent_arr;
+};
+
 struct JSON_Object
 {
   size_t val_count;
@@ -44,6 +51,11 @@ typedef struct
   JSON_Object *main_object;
 } JSON_File;
 
+
+void free_json_array(JSON_Array *arr);
+void free_json_keypair(JSON_KeyPair *kvp);
+void free_json_object(JSON_Object *obj);
+void free_json_file(JSON_File *file);
 
 void __print_version();
 JSON_File open_json_file(const char* file, const char *mode);
